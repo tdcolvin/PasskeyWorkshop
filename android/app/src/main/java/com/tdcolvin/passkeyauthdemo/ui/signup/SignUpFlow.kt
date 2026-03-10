@@ -155,6 +155,9 @@ fun SignUpGetRegisterRequestStage(
                 onValueChange = { }
             )
         }
+        else if (getRegistrationOptionsJsonResult?.isFailure == true) {
+            Text("Error getting registration options from server: ${getRegistrationOptionsJsonResult.exceptionOrNull()?.message}")
+        }
     }
 }
 
@@ -201,6 +204,9 @@ fun SignUpCreatePasskeyStage(
             readOnly = true,
             onValueChange = { }
         )
+    }
+    else if (createPasskeyResult?.isFailure == true) {
+        Text("Error creating passkey: ${createPasskeyResult.exceptionOrNull()?.message}")
     }
 }
 
