@@ -156,6 +156,10 @@ fun SignInGetAuthenticationRequestStage(
                 onValueChange = { }
             )
         }
+        else if (getAuthenticationOptionsJsonResult?.isFailure == true) {
+            Text("Error getting authentication options:")
+            Text(getAuthenticationOptionsJsonResult.exceptionOrNull()?.message ?: "Unknown error")
+        }
     }
 }
 
@@ -202,6 +206,9 @@ fun SignInGetCredentialStage(
             readOnly = true,
             onValueChange = { }
         )
+    }
+    else if (getCredentialResult?.isFailure == true) {
+        Text("Error getting credential: ${getCredentialResult.exceptionOrNull()?.message}")
     }
 }
 
