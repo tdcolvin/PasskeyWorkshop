@@ -22,5 +22,6 @@ object CredentialManagerModule {
            Use the androidx.credentials library to create a CredentialManager.
            Hint: CredentialManager.create
          */
+        return CredentialManager.create(context)
     }
 }

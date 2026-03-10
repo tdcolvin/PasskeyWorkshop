@@ -52,8 +52,18 @@ class SignInViewModel @Inject constructor(
 
                    Return the response body.
                  */
+                val url = HttpUrl.Builder()
+                    .scheme("https")
+                    .host("auth.tomcolvin.co.uk")
+                    .addPathSegment("generate-authentication-options")
+                    .addQueryParameter("username", username)
+                    .build()
+                val request = Request.Builder()
+                    .url(url)
+                    .build()
 
-                throw Exception("Remove this line!")
+                val response = okHttpClient.newCall(request).execute()
+                response.body.string()
             }
 
             _uiState.update {
@@ -83,7 +93,23 @@ class SignInViewModel @Inject constructor(
                        authenticationRequestJson it produces
                  */
 
-                throw Exception("Remove this line!")
+                val getPublicKeyCredentialOption = GetPublicKeyCredentialOption(
+                    requestJson = authenticationRequestJson
+                )
+                val signInRequest = GetCredentialRequest(listOf(getPublicKeyCredentialOption))
+
+                val result = credentialManager.getCredential(
+                    context = activity,
+                    request = signInRequest
+                )
+
+                val credential = result.credential
+
+                if (credential !is PublicKeyCredential) {
+                    throw Exception("Incorrect credential type")
+                }
+
+                credential.authenticationResponseJson
             }
 
             _uiState.update {
@@ -109,7 +135,20 @@ class SignInViewModel @Inject constructor(
 
                    Return the response body. Throw an exception if the response code != 200
                  */
-                throw Exception("Remove this line!")
+                val url = HttpUrl.Builder()
+                    .scheme("https")
+                    .host("auth.tomcolvin.co.uk")
+                    .addPathSegment("verify-authentication")
+                    .build()
+                val request = Request.Builder()
+                    .url(url)
+                    .post(authenticationResponseJson.toRequestBody("application/json".toMediaType()))
+                    .build()
+
+                val response = okHttpClient.newCall(request).execute()
+                if (response.code != 200) {
+                    throw Exception("Authentication failed: ${response.body.string()}")
+                }
             }
 
             _uiState.update {

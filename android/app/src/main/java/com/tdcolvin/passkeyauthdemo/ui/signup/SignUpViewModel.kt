@@ -50,7 +50,18 @@ class SignUpViewModel @Inject constructor(
 
                    Return the response body.
                  */
-                throw Exception("Remove this line!")
+                val url = HttpUrl.Builder()
+                    .scheme("https")
+                    .host("auth.tomcolvin.co.uk")
+                    .addPathSegment("generate-registration-options")
+                    .addQueryParameter("username", username)
+                    .build()
+                val request = Request.Builder()
+                    .url(url)
+                    .build()
+
+                val response = okHttpClient.newCall(request).execute()
+                response.body.string()
             }
 
             _uiState.update { it.copy(
@@ -76,7 +87,20 @@ class SignUpViewModel @Inject constructor(
                     2. Use Credential Manager to create the credential
                     3. Return the registrationResponseJson it produces
                  */
-                throw Exception("Remove this line!")
+                val createPublicKeyCredentialRequest = CreatePublicKeyCredentialRequest(
+                    requestJson = registerRequestJson,
+                    preferImmediatelyAvailableCredentials = false
+                )
+                val createCredentialResponse = credentialManager.createCredential(
+                    context = activity,
+                    request = createPublicKeyCredentialRequest
+                )
+
+                if (createCredentialResponse !is CreatePublicKeyCredentialResponse) {
+                    throw Exception("Incorrect response type")
+                }
+
+                createCredentialResponse.registrationResponseJson
             }
 
             _uiState.update { it.copy(
@@ -100,8 +124,20 @@ class SignUpViewModel @Inject constructor(
 
                    Return the response body. Throw an exception if the response code != 200
                  */
+                val url = HttpUrl.Builder()
+                    .scheme("https")
+                    .host("auth.tomcolvin.co.uk")
+                    .addPathSegment("verify-registration")
+                    .build()
+                val request = Request.Builder()
+                    .url(url)
+                    .post(registrationResponseJson.toRequestBody("application/json".toMediaType()))
+                    .build()
 
-                throw Exception("Remove this line!")
+                val response = okHttpClient.newCall(request).execute()
+                if (response.code != 200) {
+                    throw Exception("Registration failed: ${response.body.string()}")
+                }
             }
 
             _uiState.update { it.copy(
